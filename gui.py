@@ -17,8 +17,10 @@ class StockMonitorGUI:
         self.monitor = StockMonitor()
         self.email_sender = EmailSender()
         
-        # 설정 파일 경로
-        self.config_file = "monitor_config.json"
+        # 설정 파일 경로 (사용자 홈 디렉토리에 저장)
+        import os
+        home_dir = os.path.expanduser("~")
+        self.config_file = os.path.join(home_dir, "StockMonitor_config.json")
         
         # GUI 구성
         self._create_widgets()
@@ -167,7 +169,7 @@ class StockMonitorGUI:
         button_frame.grid(row=row, column=0, columnspan=3, pady=(10, 0))
         
         # 설정 저장 버튼
-        save_config_btn = ttk.Button(button_frame, text="설정 저장", command=self._save_config)
+        save_config_btn = ttk.Button(button_frame, text="설정 저장", command=self._manual_save_config)
         save_config_btn.pack(side=tk.LEFT, padx=(0, 10))
         
         # 설정 불러오기 버튼
@@ -188,6 +190,8 @@ class StockMonitorGUI:
         
         if success:
             messagebox.showinfo("연결 성공", message)
+            # 성공 시 자동 저장
+            self._save_config()
         else:
             messagebox.showerror("연결 실패", message)
     
@@ -209,6 +213,9 @@ class StockMonitorGUI:
             self.url_var.set("")  # 입력 필드 초기화
             self._update_url_list()
             self._log_message(f"URL 추가됨: {url}")
+            
+            # URL 추가 후 자동 저장
+            self._save_config()
         else:
             messagebox.showerror("오류", "URL 추가에 실패했습니다.")
     
@@ -223,6 +230,9 @@ class StockMonitorGUI:
         if self.monitor.remove_url(url):
             self._update_url_list()
             self._log_message(f"URL 제거됨: {url}")
+            
+            # URL 제거 후 자동 저장
+            self._save_config()
         else:
             messagebox.showerror("오류", "URL 제거에 실패했습니다.")
     
@@ -327,12 +337,26 @@ class StockMonitorGUI:
         }
         
         try:
+            # 설정 파일이 저장될 디렉토리 생성
+            config_dir = os.path.dirname(self.config_file)
+            if not os.path.exists(config_dir):
+                os.makedirs(config_dir)
+            
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(config_data, f, ensure_ascii=False, indent=2)
             
-            messagebox.showinfo("성공", "설정이 저장되었습니다.")
-            self._log_message("설정이 저장되었습니다.")
+            # 자동 저장 시에는 팝업을 표시하지 않음 (로그만 기록)
+            self._log_message("설정이 자동 저장되었습니다.")
             
+        except Exception as e:
+            self._log_message(f"설정 저장 실패: {e}")
+            messagebox.showerror("오류", f"설정 저장에 실패했습니다: {e}")
+    
+    def _manual_save_config(self):
+        """수동으로 설정을 저장합니다."""
+        try:
+            self._save_config()
+            messagebox.showinfo("성공", "설정이 저장되었습니다.")
         except Exception as e:
             messagebox.showerror("오류", f"설정 저장에 실패했습니다: {e}")
     
@@ -361,8 +385,17 @@ class StockMonitorGUI:
     
     def _exit_application(self):
         """애플리케이션을 종료합니다."""
-        if self.monitor.is_running:
-            self.monitor.stop_monitoring()
+        try:
+            # 모니터링 중지
+            if self.monitor.is_running:
+                self.monitor.stop_monitoring()
+            
+            # 종료 전 자동으로 설정 저장
+            self._save_config()
+            self._log_message("설정이 자동 저장되었습니다.")
+            
+        except Exception as e:
+            print(f"설정 저장 중 오류: {e}")
         
         self.root.quit()
 
