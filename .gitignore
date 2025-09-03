@@ -1,2 +1,6 @@
 StockMonitor-*
 *.zip
+dist
+build
+venv
+make.md
