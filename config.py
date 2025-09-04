@@ -17,8 +17,19 @@ class Config:
     # 웹사이트 설정
     SUPPORTED_WEBSITES = {
         'ownerclan': {
-            'base_url': 'https://ownerclan.com',
+            'base_url': 'ownerclan.com',  # https:// 제거하여 도메인만 매칭
+            'url_patterns': [  # 여러 URL 패턴 지원
+                'ownerclan.com',
+                'www.ownerclan.com',
+                'https://ownerclan.com',
+                'https://www.ownerclan.com'
+            ],
             'stock_check_selector': '.detail04 select option',
-            'out_of_stock_text': '품절'
+            'out_of_stock_text': '품절',
+            'multi_level_options': True,  # 2계층 옵션 지원
+            'option1_selector': '#option1',  # 첫 번째 옵션 선택자
+            'option2_selector': '#option2',  # 두 번째 옵션 선택자
+            'stock_status_selector': 'option',  # 품절 상태 확인할 옵션 요소
+            'stock_check_method': 'multi_level'  # 다계층 옵션 체크 방법
         }
     }

@@ -314,7 +314,11 @@ class BuildManager:
             
             # 계속할지 확인
             if choice != '0':
-                input("\n계속하려면 Enter를 누르세요...")
+                try:
+                    input("\n계속하려면 Enter를 누르세요...")
+                except (EOFError, KeyboardInterrupt):
+                    print("\n👋 빌드를 종료합니다.")
+                    break
 
 if __name__ == "__main__":
     try:
@@ -322,6 +326,8 @@ if __name__ == "__main__":
         build_manager.run()
     except KeyboardInterrupt:
         print("\n\n👋 빌드를 취소했습니다.")
+    except EOFError:
+        print("\n\n👋 입력이 종료되었습니다.")
     except Exception as e:
         print(f"\n❌ 예상치 못한 오류가 발생했습니다: {e}")
         sys.exit(1)

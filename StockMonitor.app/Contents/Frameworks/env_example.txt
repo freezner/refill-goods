@@ -1,0 +1,12 @@
+# 이메일 설정
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASSWORD=your_app_password
+DEFAULT_RECEIVER_EMAIL=receiver@example.com
+
+# 참고사항:
+# Gmail을 사용하는 경우:
+# 1. 2단계 인증을 활성화하세요
+# 2. 앱 비밀번호를 생성하여 EMAIL_PASSWORD에 입력하세요
+# 3. 일반 비밀번호는 사용하지 마세요
